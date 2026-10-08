@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     paths-ignore:
       - README.md
@@ -128,7 +129,7 @@ jobs:
           & "$env:GITHUB_WORKSPACE\$env:TOOLSCREEN_ARTIFACT_DIR\toolscreen_gui_integration_tests.exe" --run-groups-parallel
 
       - name: Upload native payloads for universal packaging
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v4
         with:
           name: toolscreen-${{ matrix.arch }}-packaging-inputs
@@ -140,7 +141,7 @@ jobs:
             ${{ env.TOOLSCREEN_ARTIFACT_DIR }}/${{ matrix.logger_name }}.dll
 
       - name: Assemble unsigned native release inputs
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         shell: pwsh
         run: |
           $releaseDir = Join-Path $env:GITHUB_WORKSPACE $env:TOOLSCREEN_RELEASE_DIR
@@ -153,7 +154,7 @@ jobs:
           Copy-Item -Path (Join-Path $coreDir '${{ matrix.logger_name }}.dll') -Destination (Join-Path $releaseDir '${{ matrix.logger_name }}.dll') -Force
 
       - name: Strip private symbols from unsigned PDB
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         shell: pwsh
         run: |
           $artifactDir = Join-Path $env:GITHUB_WORKSPACE $env:TOOLSCREEN_RELEASE_DIR
@@ -195,7 +196,7 @@ jobs:
           Write-Host ('Reduced Toolscreen.pdb from {0} MiB to {1} MiB using PDBCopy.' -f [math]::Round($beforeSizeBytes / 1MB, 2), [math]::Round($afterSizeBytes / 1MB, 2))
 
       - name: Validate unsigned PE metadata
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         shell: pwsh
         run: |
           $scriptPath = Join-Path $env:GITHUB_WORKSPACE 'scripts\verify_unsigned_pe_metadata.ps1'
@@ -203,7 +204,7 @@ jobs:
           & $scriptPath -ArtifactDirectory $artifactDirectory
 
       - name: Rename native release artifacts
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         shell: pwsh
         run: |
           $outputDir = Join-Path $env:GITHUB_WORKSPACE $env:TOOLSCREEN_RELEASE_DIR
@@ -225,7 +226,7 @@ jobs:
           }
 
       - name: Upload unsigned native release inputs
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
         uses: actions/upload-artifact@v4
         with:
           name: toolscreen-${{ matrix.arch }}-unsigned-release-inputs
@@ -243,7 +244,7 @@ jobs:
         run: sccache --show-stats
 
   package_universal:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
     needs: build_core
     runs-on: windows-latest
     permissions:
