@@ -997,6 +997,8 @@ struct NinjabrainOverlayConfig {
     float deltaHudOffset = 50.0f;
     bool deltaHudShowCenterDot = true;
     bool deltaHudShowArrows = false;
+    bool deltaHudAutoDimension = true;
+    bool deltaHudShowDimensionTag = true;
     Color deltaHudPositiveColor = { 0.2f, 1.0f, 0.2f, 1.0f };
     Color deltaHudNegativeColor = { 1.0f, 0.35f, 0.35f, 1.0f };
     Color deltaHudCenterColor = { 1.0f, 1.0f, 1.0f, 0.6f };

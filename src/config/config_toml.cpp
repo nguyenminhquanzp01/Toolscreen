@@ -2438,11 +2438,13 @@ void ConfigToToml(const Config& config, toml::table& out) {
         nb.insert("deltaHudRelativeTo",     o.deltaHudRelativeTo);
         nb.insert("deltaHudScale",          o.deltaHudScale);
         nb.insert("deltaHudOffset",         o.deltaHudOffset);
-        nb.insert("deltaHudShowCenterDot",  o.deltaHudShowCenterDot);
-        nb.insert("deltaHudShowArrows",     o.deltaHudShowArrows);
-        nb.insert("deltaHudPositiveColor",  ColorToTomlArray(o.deltaHudPositiveColor));
-        nb.insert("deltaHudNegativeColor",  ColorToTomlArray(o.deltaHudNegativeColor));
-        nb.insert("deltaHudCenterColor",    ColorToTomlArray(o.deltaHudCenterColor));
+        nb.insert("deltaHudShowCenterDot",     o.deltaHudShowCenterDot);
+        nb.insert("deltaHudShowArrows",        o.deltaHudShowArrows);
+        nb.insert("deltaHudAutoDimension",     o.deltaHudAutoDimension);
+        nb.insert("deltaHudShowDimensionTag",  o.deltaHudShowDimensionTag);
+        nb.insert("deltaHudPositiveColor",     ColorToTomlArray(o.deltaHudPositiveColor));
+        nb.insert("deltaHudNegativeColor",     ColorToTomlArray(o.deltaHudNegativeColor));
+        nb.insert("deltaHudCenterColor",       ColorToTomlArray(o.deltaHudCenterColor));
         out.insert("ninjabrainOverlay", nb);
     }
 
@@ -2895,6 +2897,8 @@ void ConfigFromToml(const toml::table& tbl, Config& config) {
         c.deltaHudOffset = (float)GetOr(*nb, "deltaHudOffset", 50.0);
         c.deltaHudShowCenterDot = GetOr(*nb, "deltaHudShowCenterDot", true);
         c.deltaHudShowArrows = GetOr(*nb, "deltaHudShowArrows", false);
+        c.deltaHudAutoDimension = GetOr(*nb, "deltaHudAutoDimension", true);
+        c.deltaHudShowDimensionTag = GetOr(*nb, "deltaHudShowDimensionTag", true);
         if (auto* a = nb->get_as<toml::array>("deltaHudPositiveColor")) {
             c.deltaHudPositiveColor = ColorFromTomlArray(a, c.deltaHudPositiveColor);
         }

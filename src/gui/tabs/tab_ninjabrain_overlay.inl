@@ -34,6 +34,8 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
             const float deltaHudOffset = nb.deltaHudOffset;
             const bool deltaHudShowCenterDot = nb.deltaHudShowCenterDot;
             const bool deltaHudShowArrows = nb.deltaHudShowArrows;
+            const bool deltaHudAutoDimension = nb.deltaHudAutoDimension;
+            const bool deltaHudShowDimensionTag = nb.deltaHudShowDimensionTag;
             const Color deltaHudPositiveColor = nb.deltaHudPositiveColor;
             const Color deltaHudNegativeColor = nb.deltaHudNegativeColor;
             const Color deltaHudCenterColor = nb.deltaHudCenterColor;
@@ -57,6 +59,8 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
                 preset.deltaHudOffset = deltaHudOffset;
                 preset.deltaHudShowCenterDot = deltaHudShowCenterDot;
                 preset.deltaHudShowArrows = deltaHudShowArrows;
+                preset.deltaHudAutoDimension = deltaHudAutoDimension;
+                preset.deltaHudShowDimensionTag = deltaHudShowDimensionTag;
                 preset.deltaHudPositiveColor = deltaHudPositiveColor;
                 preset.deltaHudNegativeColor = deltaHudNegativeColor;
                 preset.deltaHudCenterColor = deltaHudCenterColor;
@@ -967,6 +971,8 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
 
                 if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_show_center_dot")) + "##deltaHudDot").c_str(), &nb.deltaHudShowCenterDot)) changed = true;
                 if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_show_arrows")) + "##deltaHudArrows").c_str(), &nb.deltaHudShowArrows)) changed = true;
+                if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_auto_dimension")) + "##deltaHudAutoDim").c_str(), &nb.deltaHudAutoDimension)) changed = true;
+                if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_show_dimension_tag")) + "##deltaHudDimTag").c_str(), &nb.deltaHudShowDimensionTag)) changed = true;
 
                 ImGui::Spacing();
                 ImGui::Columns(2, "nb_delta_hud_colors", false);

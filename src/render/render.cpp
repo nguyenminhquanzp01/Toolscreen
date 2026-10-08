@@ -4837,7 +4837,9 @@ static bool HasNinjabrainOverlayContent(const NinjabrainOverlayConfig& nb, const
     const bool hasInformationMessages = data.informationMessageCount > 0;
     const bool boatError = (data.boatState == "ERROR");
     const bool showForBoat = nb.alwaysShowBoat || boatError;
-    const bool hasDeltaHudContent = nb.deltaHudEnabled && data.hasPlayerPos && (data.predictionCount > 0);
+    const bool hasBlind = data.playerInNether && data.blind.enabled && data.blind.hasResult;
+    const bool hasDeltaHudContent = nb.deltaHudEnabled && data.hasPlayerPos &&
+        (data.predictionCount > 0 || hasBlind);
 
     if (outHasTriangulation) { *outHasTriangulation = hasTriangulation; }
     if (outShowForBoat) { *outShowForBoat = showForBoat; }
@@ -10767,7 +10769,12 @@ static void EnsureNinjabrainOverlayIconsLoaded()
 static void RenderStrongholdDeltaHud(const NinjabrainOverlayConfig& nb, ImFont* font, const NinjabrainData& data,
                                      bool renderBehindImGuiWindows)
 {
-    if (!nb.deltaHudEnabled || !data.hasPlayerPos || data.predictionCount <= 0) {
+    const bool inNether = nb.deltaHudAutoDimension && data.playerInNether;
+
+    // Check if we have valid target data (Triangulation or Blind in Nether)
+    const bool hasTriangulation = (data.predictionCount > 0);
+    const bool hasBlind = inNether && data.blind.enabled && data.blind.hasResult;
+    if (!nb.deltaHudEnabled || !data.hasPlayerPos || (!hasTriangulation && !hasBlind)) {
         return;
     }
 
@@ -10790,11 +10797,24 @@ static void RenderStrongholdDeltaHud(const NinjabrainOverlayConfig& nb, ImFont* 
     const float cx = static_cast<float>(centerX);
     const float cy = static_cast<float>(centerY);
 
-    // Stronghold coordinates from prediction 0
-    const double shX = data.predictions[0].chunkX * 16.0 + 4.0;
-    const double shZ = data.predictions[0].chunkZ * 16.0 + 4.0;
-    const double deltaX = shX - data.playerX;
-    const double deltaZ = shZ - data.playerZ;
+    double targetX = 0.0;
+    double targetZ = 0.0;
+    // data.playerX and data.playerZ are in Overworld coordinates
+    double playerX = inNether ? (data.playerX / 8.0) : data.playerX;
+    double playerZ = inNether ? (data.playerZ / 8.0) : data.playerZ;
+
+    if (hasTriangulation) {
+        const double shX = data.predictions[0].chunkX * 16.0 + 4.0;
+        const double shZ = data.predictions[0].chunkZ * 16.0 + 4.0;
+        targetX = inNether ? (shX / 8.0) : shX;
+        targetZ = inNether ? (shZ / 8.0) : shZ;
+    } else if (hasBlind) {
+        targetX = data.blind.xInNether;
+        targetZ = data.blind.zInNether;
+    }
+
+    const double deltaX = targetX - playerX;
+    const double deltaZ = targetZ - playerZ;
 
     const int roundDeltaX = static_cast<int>(std::round(deltaX));
     const int roundDeltaZ = static_cast<int>(std::round(deltaZ));
@@ -10810,13 +10830,14 @@ static void RenderStrongholdDeltaHud(const NinjabrainOverlayConfig& nb, ImFont* 
     const ImU32 centerCol = ColorToImU32(nb.deltaHudCenterColor);
     const ImU32 outlineCol = IM_COL32(0, 0, 0, 230);
 
-    auto drawTextWithOutline = [&](ImVec2 pos, ImU32 textCol, const char* text) {
+    auto drawTextWithOutline = [&](ImVec2 pos, ImU32 textCol, const char* text, float fontSize = 0.0f) {
+        const float activeFs = (fontSize > 0.0f) ? fontSize : fs;
         constexpr float o = 1.5f;
-        drawList->AddText(font, fs, ImVec2(pos.x - o, pos.y), outlineCol, text);
-        drawList->AddText(font, fs, ImVec2(pos.x + o, pos.y), outlineCol, text);
-        drawList->AddText(font, fs, ImVec2(pos.x, pos.y - o), outlineCol, text);
-        drawList->AddText(font, fs, ImVec2(pos.x, pos.y + o), outlineCol, text);
-        drawList->AddText(font, fs, pos, textCol, text);
+        drawList->AddText(font, activeFs, ImVec2(pos.x - o, pos.y), outlineCol, text);
+        drawList->AddText(font, activeFs, ImVec2(pos.x + o, pos.y), outlineCol, text);
+        drawList->AddText(font, activeFs, ImVec2(pos.x, pos.y - o), outlineCol, text);
+        drawList->AddText(font, activeFs, ImVec2(pos.x, pos.y + o), outlineCol, text);
+        drawList->AddText(font, activeFs, pos, textCol, text);
     };
 
     // Center cross / dot
@@ -10824,6 +10845,18 @@ static void RenderStrongholdDeltaHud(const NinjabrainOverlayConfig& nb, ImFont* 
         const float dotR = 2.5f * scale;
         drawList->AddCircleFilled(ImVec2(cx, cy), dotR + 1.0f, outlineCol);
         drawList->AddCircleFilled(ImVec2(cx, cy), dotR, centerCol);
+    }
+
+    // Optional Dimension Badge (NETHER vs OVERWORLD)
+    if (nb.deltaHudShowDimensionTag) {
+        const char* dimLabel = inNether ? "NETHER" : "OVERWORLD";
+        const ImU32 dimCol = inNether
+            ? IM_COL32(255, 140, 50, 230)   // Fiery orange for Nether
+            : IM_COL32(80, 220, 120, 230);  // Green for Overworld
+        const float tagFs = (std::max)(10.0f, fs * 0.42f);
+        const ImVec2 tagSz = font->CalcTextSizeA(tagFs, FLT_MAX, 0.0f, dimLabel);
+        const ImVec2 tagPos(cx - tagSz.x * 0.5f, cy + 5.0f * scale);
+        drawTextWithOutline(tagPos, dimCol, dimLabel, tagFs);
     }
 
     char buf[64];
