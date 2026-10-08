@@ -1399,8 +1399,6 @@ void RunProfileSwitchNinjabrainAsyncRestartTest(TestRunMode runMode = TestRunMod
 
     g_config.ninjabrainOverlay.enabled = false;
     PublishGuiConfigSnapshot();
-    StopNinjabrainClientAsync();
-    std::this_thread::sleep_for(std::chrono::milliseconds(6500));
     StopNinjabrainClient();
 }
 
