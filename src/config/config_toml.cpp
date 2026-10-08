@@ -2432,6 +2432,19 @@ void ConfigToToml(const Config& config, toml::table& out) {
             colArr.push_back(ct);
         }
         nb.insert("columns", colArr);
+        nb.insert("deltaHudEnabled",        o.deltaHudEnabled);
+        nb.insert("deltaHudX",              o.deltaHudX);
+        nb.insert("deltaHudY",              o.deltaHudY);
+        nb.insert("deltaHudRelativeTo",     o.deltaHudRelativeTo);
+        nb.insert("deltaHudScale",          o.deltaHudScale);
+        nb.insert("deltaHudOffset",         o.deltaHudOffset);
+        nb.insert("deltaHudShowCenterDot",     o.deltaHudShowCenterDot);
+        nb.insert("deltaHudShowArrows",        o.deltaHudShowArrows);
+        nb.insert("deltaHudAutoDimension",     o.deltaHudAutoDimension);
+        nb.insert("deltaHudShowDimensionTag",  o.deltaHudShowDimensionTag);
+        nb.insert("deltaHudPositiveColor",     ColorToTomlArray(o.deltaHudPositiveColor));
+        nb.insert("deltaHudNegativeColor",     ColorToTomlArray(o.deltaHudNegativeColor));
+        nb.insert("deltaHudCenterColor",       ColorToTomlArray(o.deltaHudCenterColor));
         out.insert("ninjabrainOverlay", nb);
     }
 
@@ -2875,6 +2888,25 @@ void ConfigFromToml(const toml::table& tbl, Config& config) {
                 {"nether",    "Nether",   true},
                 {"angle",     "Angle",    true},
             };
+        }
+        c.deltaHudEnabled = GetOr(*nb, "deltaHudEnabled", false);
+        c.deltaHudX = GetOr(*nb, "deltaHudX", 0);
+        c.deltaHudY = GetOr(*nb, "deltaHudY", 0);
+        c.deltaHudRelativeTo = GetOr(*nb, "deltaHudRelativeTo", std::string("centerScreen"));
+        c.deltaHudScale = (float)GetOr(*nb, "deltaHudScale", 1.0);
+        c.deltaHudOffset = (float)GetOr(*nb, "deltaHudOffset", 50.0);
+        c.deltaHudShowCenterDot = GetOr(*nb, "deltaHudShowCenterDot", true);
+        c.deltaHudShowArrows = GetOr(*nb, "deltaHudShowArrows", false);
+        c.deltaHudAutoDimension = GetOr(*nb, "deltaHudAutoDimension", true);
+        c.deltaHudShowDimensionTag = GetOr(*nb, "deltaHudShowDimensionTag", true);
+        if (auto* a = nb->get_as<toml::array>("deltaHudPositiveColor")) {
+            c.deltaHudPositiveColor = ColorFromTomlArray(a, c.deltaHudPositiveColor);
+        }
+        if (auto* a = nb->get_as<toml::array>("deltaHudNegativeColor")) {
+            c.deltaHudNegativeColor = ColorFromTomlArray(a, c.deltaHudNegativeColor);
+        }
+        if (auto* a = nb->get_as<toml::array>("deltaHudCenterColor")) {
+            c.deltaHudCenterColor = ColorFromTomlArray(a, c.deltaHudCenterColor);
         }
     }
 

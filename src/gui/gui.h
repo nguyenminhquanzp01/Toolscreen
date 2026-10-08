@@ -987,6 +987,21 @@ struct NinjabrainOverlayConfig {
         {"nether", "Nether", true},
         {"angle", "Angle", true},
     };
+
+    // Stronghold Delta X/Z D-Pad HUD
+    bool deltaHudEnabled = false;
+    int deltaHudX = 0;
+    int deltaHudY = 0;
+    std::string deltaHudRelativeTo = "centerScreen";
+    float deltaHudScale = 1.0f;
+    float deltaHudOffset = 50.0f;
+    bool deltaHudShowCenterDot = true;
+    bool deltaHudShowArrows = false;
+    bool deltaHudAutoDimension = true;
+    bool deltaHudShowDimensionTag = true;
+    Color deltaHudPositiveColor = { 0.2f, 1.0f, 0.2f, 1.0f };
+    Color deltaHudNegativeColor = { 1.0f, 0.35f, 0.35f, 1.0f };
+    Color deltaHudCenterColor = { 1.0f, 1.0f, 1.0f, 0.6f };
 };
 struct Config {
     int configVersion = GetConfigVersion();
