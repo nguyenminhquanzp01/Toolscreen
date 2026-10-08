@@ -10783,10 +10783,11 @@ static void RenderStrongholdDeltaHud(const NinjabrainOverlayConfig& nb, ImFont* 
     ImDrawList* drawList = renderBehindImGuiWindows ? ImGui::GetBackgroundDrawList() : ImGui::GetForegroundDrawList();
     if (!drawList) return;
 
-    const Geometry geo = GetLastCalculatedGeometry();
-    const int sw = geo.fullW;
-    const int sh = geo.fullH;
+    const int sw = GetCachedWindowWidth();
+    const int sh = GetCachedWindowHeight();
     if (sw <= 0 || sh <= 0) return;
+
+    const auto& geo = g_lastFrameGeometry;
 
     int centerX = 0, centerY = 0;
     GetRelativeCoordsForImageWithViewport(
