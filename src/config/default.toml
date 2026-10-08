@@ -141,6 +141,17 @@ columns = [
 ]
 contentPaddingBottom = 0.0
 contentPaddingTop = 0.0
+deltaHudCenterColor = [ 255, 255, 255, 153 ]
+deltaHudEnabled = false
+deltaHudNegativeColor = [ 255, 89, 89, 255 ]
+deltaHudOffset = 50.0
+deltaHudPositiveColor = [ 51, 255, 51, 255 ]
+deltaHudRelativeTo = 'centerScreen'
+deltaHudScale = 1.0
+deltaHudShowArrows = false
+deltaHudShowCenterDot = true
+deltaHudX = 0
+deltaHudY = 0
 coordNegativeColor = [ 255, 255, 255 ]
 coordPositiveColor = [ 255, 255, 255 ]
 coordsDisplay = 'block'

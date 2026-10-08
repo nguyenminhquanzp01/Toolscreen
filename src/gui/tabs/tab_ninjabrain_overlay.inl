@@ -26,6 +26,17 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
             const std::vector<std::string> allowedModes = nb.allowedModes;
             const bool onlyOnMyScreen = nb.onlyOnMyScreen;
             const bool onlyOnObs = nb.onlyOnObs;
+            const bool deltaHudEnabled = nb.deltaHudEnabled;
+            const int deltaHudX = nb.deltaHudX;
+            const int deltaHudY = nb.deltaHudY;
+            const std::string deltaHudRelativeTo = nb.deltaHudRelativeTo;
+            const float deltaHudScale = nb.deltaHudScale;
+            const float deltaHudOffset = nb.deltaHudOffset;
+            const bool deltaHudShowCenterDot = nb.deltaHudShowCenterDot;
+            const bool deltaHudShowArrows = nb.deltaHudShowArrows;
+            const Color deltaHudPositiveColor = nb.deltaHudPositiveColor;
+            const Color deltaHudNegativeColor = nb.deltaHudNegativeColor;
+            const Color deltaHudCenterColor = nb.deltaHudCenterColor;
             NinjabrainOverlayConfig preset = presetDefinition.overlay;
 
             if (presetDefinition.preserveCurrentPlacement) {
@@ -38,6 +49,17 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
                 preset.allowedModes = allowedModes;
                 preset.onlyOnMyScreen = onlyOnMyScreen;
                 preset.onlyOnObs = onlyOnObs;
+                preset.deltaHudEnabled = deltaHudEnabled;
+                preset.deltaHudX = deltaHudX;
+                preset.deltaHudY = deltaHudY;
+                preset.deltaHudRelativeTo = deltaHudRelativeTo;
+                preset.deltaHudScale = deltaHudScale;
+                preset.deltaHudOffset = deltaHudOffset;
+                preset.deltaHudShowCenterDot = deltaHudShowCenterDot;
+                preset.deltaHudShowArrows = deltaHudShowArrows;
+                preset.deltaHudPositiveColor = deltaHudPositiveColor;
+                preset.deltaHudNegativeColor = deltaHudNegativeColor;
+                preset.deltaHudCenterColor = deltaHudCenterColor;
             }
             nb = std::move(preset);
             g_eyeZoomFontNeedsReload.store(true);
@@ -892,6 +914,93 @@ if (BeginSelectableSettingsNestedTabItem(trc("ninjabrain.title"))) {
             ImGui::NextColumn();
 
             ImGui::Columns(1);
+        }
+
+        if (ImGui::CollapsingHeader(trc("ninjabrain.delta_hud"), kNinjabrainOpenSectionFlags)) {
+            if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_enable")) + "##deltaHud").c_str(), &nb.deltaHudEnabled)) changed = true;
+
+            if (nb.deltaHudEnabled) {
+                ImGui::Columns(2, "nb_delta_hud_cols", false);
+                ImGui::SetColumnWidth(0, kNinjabrainLabelColumnWidth);
+
+                ImGui::Text("%s", trc("ninjabrain.pos_x"));
+                ImGui::NextColumn();
+                if (Spinner("##delta_hud_x", &nb.deltaHudX)) changed = true;
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.pos_y"));
+                ImGui::NextColumn();
+                if (Spinner("##delta_hud_y", &nb.deltaHudY)) changed = true;
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.relative_to"));
+                ImGui::NextColumn();
+                const char* cur_delta_rel_to = getFriendlyName(nb.deltaHudRelativeTo, ninjabrainRelativeToOptions);
+                ImGui::SetNextItemWidth(210);
+                if (ImGui::BeginCombo("##delta_hud_rel_to", cur_delta_rel_to)) {
+                    for (const auto& option : ninjabrainRelativeToOptions) {
+                        if (ImGui::Selectable(option.second, nb.deltaHudRelativeTo == option.first)) {
+                            nb.deltaHudRelativeTo = option.first; changed = true;
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.delta_hud_offset"));
+                ImGui::NextColumn();
+                ImGui::SetNextItemWidth(210);
+                if (ImGui::SliderFloat("##delta_hud_offset", &nb.deltaHudOffset, 10.0f, 250.0f, "%.0f px")) changed = true;
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.delta_hud_scale"));
+                ImGui::NextColumn();
+                float deltaScalePercent = nb.deltaHudScale * 100.0f;
+                ImGui::SetNextItemWidth(210);
+                if (ImGui::SliderFloat("##delta_hud_scale", &deltaScalePercent, 20.0f, 300.0f, "%.0f%%")) {
+                    nb.deltaHudScale = deltaScalePercent / 100.0f;
+                    changed = true;
+                }
+                ImGui::NextColumn();
+
+                ImGui::Columns(1);
+
+                if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_show_center_dot")) + "##deltaHudDot").c_str(), &nb.deltaHudShowCenterDot)) changed = true;
+                if (ImGui::Checkbox((std::string(trc("ninjabrain.delta_hud_show_arrows")) + "##deltaHudArrows").c_str(), &nb.deltaHudShowArrows)) changed = true;
+
+                ImGui::Spacing();
+                ImGui::Columns(2, "nb_delta_hud_colors", false);
+                ImGui::SetColumnWidth(0, kNinjabrainLabelColumnWidth);
+
+                ImGui::Text("%s", trc("ninjabrain.delta_hud_positive_color"));
+                ImGui::NextColumn();
+                float posCol[4] = { nb.deltaHudPositiveColor.r, nb.deltaHudPositiveColor.g, nb.deltaHudPositiveColor.b, nb.deltaHudPositiveColor.a };
+                if (ImGui::ColorEdit4("##deltaHudPosCol", posCol, ImGuiColorEditFlags_NoInputs)) {
+                    nb.deltaHudPositiveColor = { posCol[0], posCol[1], posCol[2], posCol[3] };
+                    changed = true;
+                }
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.delta_hud_negative_color"));
+                ImGui::NextColumn();
+                float negCol[4] = { nb.deltaHudNegativeColor.r, nb.deltaHudNegativeColor.g, nb.deltaHudNegativeColor.b, nb.deltaHudNegativeColor.a };
+                if (ImGui::ColorEdit4("##deltaHudNegCol", negCol, ImGuiColorEditFlags_NoInputs)) {
+                    nb.deltaHudNegativeColor = { negCol[0], negCol[1], negCol[2], negCol[3] };
+                    changed = true;
+                }
+                ImGui::NextColumn();
+
+                ImGui::Text("%s", trc("ninjabrain.delta_hud_center_color"));
+                ImGui::NextColumn();
+                float dotCol[4] = { nb.deltaHudCenterColor.r, nb.deltaHudCenterColor.g, nb.deltaHudCenterColor.b, nb.deltaHudCenterColor.a };
+                if (ImGui::ColorEdit4("##deltaHudDotCol", dotCol, ImGuiColorEditFlags_NoInputs)) {
+                    nb.deltaHudCenterColor = { dotCol[0], dotCol[1], dotCol[2], dotCol[3] };
+                    changed = true;
+                }
+                ImGui::NextColumn();
+
+                ImGui::Columns(1);
+            }
         }
 
         } // nb.enabled
